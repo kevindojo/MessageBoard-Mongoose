@@ -1,12 +1,12 @@
 // ============== Always have, associated with packages installed ===========//
 var express = require('express');
+var session = require('express-session');
 var app = express();
 
 // ============== MONGOOSE ===========//
 var mongoose = require('mongoose');
 mongoose.connect('mongodb://localhost/MessageBoard'); // name of DataBase!!!!
 mongoose.Promise = global.Promise;
-
 
 
 var path = require('path');
@@ -30,90 +30,104 @@ app.use(express.static(__dirname + "/static"));
 app.set('views', path.join(__dirname, './views'));
 app.set('view engine', 'ejs');
 
-
 // ============== Setting up MONGOOSE ===========//
 
 var Schema = mongoose.Schema;
 
-var PostSchema = new mongoose.Schema({
+var MessageSchema = new mongoose.Schema({
     name:{type: String, required: true},
     message: {type: String, required: true},
     comments:[{type: Schema.Types.ObjectId, ref: 'Comment'}]
     },{ timestamps:true }, { usePushEach: true } );
 
-mongoose.model('Post', PostSchema);
-var Post = mongoose.model('Post');
+
 
 
 var CommentSchema = new mongoose.Schema({
-    _post: {type: Schema.Types.ObjectId, ref: 'Post'},
+    _message: {type: Schema.Types.ObjectId, ref: 'Message'},
     name: {type: String, required: true},
-    message: {type: String, required: true}
+    text: {type: String, required: true}
     },{ timestamps: true }, { usePushEach: true } );
 
-mongoose.model('Comment', CommentSchema);
-var Comment = mongoose.model('Comment');
+
+// set models by passing the schemas
+mongoose.model("Message", MessageSchema);
+mongoose.model("Comment", CommentSchema);
+
+// store models in variables
+var Message = mongoose.model("Message");
+var Comment = mongoose.model("Comment");
 
 
 // ================================== ROUTES!!! ===============================//
 
+
+
 // =======================DISPLAY ALL MESSAGES========================//
 app.get('/', function(request, response){
-    Post.find({}).populate('comments').exec(function(error, results){
+    Message.find({}).populate('comments').exec(function(error, messages){
         if(error){
             console.log('something broke in GET', error);
         } else {
             console.log('Success! All messages DISPLAY');
-             response.render('index', {posts: results});
+             response.render('index', {posts: messages, session: request.session});
         }
     })
 });
+// =======================DISPLAY ALL MESSAGES========================//
+
 
 
 // =======================ADD MESSAGE========================//
 app.post('/add', function(request, response){
     console.log("ADD: ", request.body);
-    
-    var post = new Post({
+    var new_message = new Message({
         name: request.body.name,
         message: request.body.message
     });
-
-    post.save(function(error, results){
+    new_message.save(function(error, results){
         if(error){
             console.log('something broke in POST SAVE message', error);
+            response.redirect('/');
         } else {
             console.log('success from add POST SAVE message', results);
             response.redirect('/');
-
         }
     })
 });
+// =======================ADD MESSAGE========================//
+
+
+
 
 // =======================ADD COMMENT========================//
-app.post('/comment/:id',function(request,repsonse){
+app.post('/comment/:id', function(request,response){
     console.log(request.params.id)
-
-    Post.findOne({_id: request.params.id}, function(error, post){
-        var comment = new Comment({
+    Message.findOne({_id: request.params.id}, function(error, message){
+        var new_comment = new Comment({
             name: request.body.name,
-            _post: post._id,
-            message: request.body.comment
-        });
-        comment.save(function(error){
-            post.comments.push(comment);
-                post.save(function(error){
+            _message: message._id,
+            text: request.body.text});
+
+        new_comment.save(function(error){
+            if(error){
+                console.log("error adding comment!!", error)
+                response.redirect('/');
+            } else {
+                message.comments.push(new_comment);
+                message.save(function(error){
                     if(error){
-                        console.log('something wrong COMMENT SAVE',error)
+                        console.log('message DIDNT save', error);
                     } else {
-                        console.log("success COMMENT ADDED");
-                        response.redirect('/');
+                        console.log('message saved!');
                     }
-            });
+                console.log("comment added!")
+                response.redirect('/');
+                });
+            }
         });
     });
 });
-
 
 
 

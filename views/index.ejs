@@ -23,6 +23,7 @@
                 Message: <input type ='textarea' name = 'message' placeholder="At least 5 characters...">
                 <input type = 'submit' value = 'Post Message'>
             </form>
+            <hr>
         </div>
 
 
@@ -32,14 +33,21 @@
             <% for ( var x in posts){ %>
                 <h5>Name: <%= posts[x].name %></h5>
                 <h5>Message: <%= posts[x].message %></h5>
-                <% for (var y of posts[x].comments){ %>
-                    <p><%= y.message %> -- <%= y.name %></p>
-                <% } %>
+
+
+                <div class ='showComment'>
+
+                    <% for (var y of posts[x].comments){ %>
+                        <h5> <%= y.name %> </h5>
+                        <p> <%= y.text %> </p>
+                    <% } %>
+                </div>
+
                 <form action = '/comment/<%=posts[x]._id%>' method = 'post'>
-                    Name: <input type = 'text' name = 'name'>
+                    Name: <input type = 'text' name = 'name' placeholder="At least 4 characters">
                     <br>
-                    Comment: <input type = 'text' name = 'comment'>
-                    <input type = 'submit' value = 'Post Comment'>
+                    Comment: <input type = 'text' name = 'text' placeholder="Add a comment">
+                    <input type = 'submit' value = 'Submit Comment'>
                 </form>
                 <br>
             <% } %>
