@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <link rel="stylesheet" type="text/css" href="css/style.css" />
+    <!-- this line of code needed for css styling -->
+
+    <title>Message Board</title>
+</head>
+<body>
+    <div class ='wrapper'>
+        <div class ='title'>
+            <h1>The Dojo Message Board</h1>
+        </div>
+
+        <div class = 'newMessage'>
+            <form action = '/add' method ='post'>
+                Name: <input type = 'text' name = 'name' placeholder="At least 4 characters">
+                <br>
+                Message: <input type ='textarea' name = 'message' placeholder="At least 5 characters...">
+                <input type = 'submit' value = 'Post Message'>
+            </form>
+        </div>
+
+
+
+
+        <div class = 'showMessage'>
+            <% for ( var x in posts){ %>
+                <h5>Name: <%= posts[x].name %></h5>
+                <h5>Message: <%= posts[x].message %></h5>
+                <% for (var y of posts[x].comments){ %>
+                    <p><%= y.message %> -- <%= y.name %></p>
+                <% } %>
+                <form action = '/comment/<%=posts[x]._id%>' method = 'post'>
+                    Name: <input type = 'text' name = 'name'>
+                    <br>
+                    Comment: <input type = 'text' name = 'comment'>
+                    <input type = 'submit' value = 'Post Comment'>
+                </form>
+                <br>
+            <% } %>
+        </div>
+    </div>
+</body>
+</html>

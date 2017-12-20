@@ -1,0 +1,9 @@
+.wrapper{
+    width: 1000px;
+    margin: auto;
+}
+
+.title{
+    border-bottom: double, 2px;
+    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+}
